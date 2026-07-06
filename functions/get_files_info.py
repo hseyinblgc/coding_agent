@@ -2,6 +2,10 @@ import os
 
 
 def get_files_info(working_directory: str, directory: str = ".") -> str:
+
+    def formatter(x):
+        return f"  - {x}: file_size={os.path.getsize(os.path.join(target_dir, x))}, is_dir={os.path.isdir(os.path.join(target_dir, x))}"
+
     try:
         working_dir_abs = os.path.abspath(working_directory)
         target_dir = os.path.normpath(os.path.join(working_dir_abs, directory))
@@ -9,9 +13,6 @@ def get_files_info(working_directory: str, directory: str = ".") -> str:
         valid_target_dir = (
             os.path.commonpath([working_dir_abs, target_dir]) == working_dir_abs
         )
-
-        def formatter(x):
-            return f"  - {x}: file_size={os.path.getsize(os.path.join(target_dir, x))}, is_dir={os.path.isdir(os.path.join(target_dir, x))}"
 
         print(f"Result for '{directory}' directory:")
         if not valid_target_dir:
