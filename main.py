@@ -1,10 +1,12 @@
 import argparse
+import json
 import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
 from openai.types.chat import ChatCompletion
 
+from call_function import available_functions
 from prompts import system_prompt
 
 load_dotenv()
@@ -30,21 +32,29 @@ messages: list[dict[str, str]] = [
 response: ChatCompletion = client.chat.completions.create(
     model="openrouter/free",
     messages=messages,
+    tools=available_functions,
     temperature=0,
 )
 
 
-def formatter(obj: ChatCompletion, userprompt: str, verbose: bool) -> str:
-    if obj.usage is None:
+def formatter(response: ChatCompletion, userprompt: str, verbose: bool) -> str:
+    message = response.choices[0].message
+    if response.usage is None:
         raise RuntimeError("usage property is None.")
+
+    if message.tool_calls:
+        for tool_call in message.tool_calls:
+            function_args = json.loads(tool_call.function.arguments or "{}")
+            print(f"Calling function: {tool_call.function.name}({function_args})")
+    
     if verbose:
         return f"""
         User prompt: {userprompt}
-        Prompt tokens: {obj.usage.prompt_tokens}
-        Response tokens: {obj.usage.completion_tokens}
+        Prompt tokens: {response.usage.prompt_tokens}
+        Response tokens: {response.usage.completion_tokens}
         Response:
-        {obj.choices[0].message.content}"""
-    return f"Response:\n{obj.choices[0].message.content}"
+        {message.content}"""
+    return f"Response:\n{message.content}"
 
 
 def main():
