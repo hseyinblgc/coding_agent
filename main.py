@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from openai.types.chat import ChatCompletion
 
+from prompts import system_prompt
+
 load_dotenv()
 api_key: str | None = os.environ.get("OPENROUTER_API_KEY")
 if api_key is None:
@@ -22,11 +24,13 @@ client = OpenAI(
 )
 
 messages: list[dict[str, str]] = [
+    {"role": "system", "content": system_prompt},
     {"role": "user", "content": args.user_prompt},
 ]
 response: ChatCompletion = client.chat.completions.create(
     model="openrouter/free",
     messages=messages,
+    temperature=0,
 )
 
 
