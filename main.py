@@ -1,6 +1,6 @@
 import argparse
-import json
 import os
+import sys
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -31,26 +31,10 @@ messages: list[dict[str, str]] = [
 ]
 
 
-response: ChatCompletion = client.chat.completions.create(
-    model="openrouter/free",
-    messages=messages,
-    tools=available_functions,
-    temperature=0,
-)
-
-
 def formatter(response: ChatCompletion, userprompt: str, verbose: bool) -> str:
     message = response.choices[0].message
     if response.usage is None:
         raise RuntimeError("usage property is None.")
-
-    if message.tool_calls:
-        for tool_call in message.tool_calls:
-            # function_args = json.loads(tool_call.function.arguments or "{}")
-            result_message = call_function(tool_call, verbose=verbose)
-            print(result_message)
-            if not result_message.get("content"):
-                raise ValueError("Tool message content cannot be empty.")
 
     if verbose:
         return f"""
@@ -63,6 +47,30 @@ def formatter(response: ChatCompletion, userprompt: str, verbose: bool) -> str:
 
 
 def main():
+    for _ in range(20):
+        response: ChatCompletion = client.chat.completions.create(
+            model="openrouter/free",
+            messages=messages,
+            tools=available_functions,
+            temperature=0,
+        )
+        message = response.choices[0].message
+        messages.append(message)
+        if message.tool_calls:
+            for tool_call in message.tool_calls:
+                # function_args = json.loads(tool_call.function.arguments or "{}")
+                result_message = call_function(tool_call, verbose=args.verbose)
+                if not result_message.get("content"):
+                    raise ValueError("Tool message content cannot be empty.")
+
+                messages.append(result_message)
+        else:
+            break
+
+    if response and response.choices[0].message.tool_calls:
+            print("maximum number of iterations is reached and the model still hasn't produced a final response")
+            sys.exit(1)
+
     print(formatter(response, args.user_prompt, args.verbose))
 
 
