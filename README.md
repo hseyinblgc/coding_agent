@@ -6,10 +6,10 @@ A lightweight Python coding agent that uses OpenAI-compatible chat completions (
 
 This repository combines:
 
-- An LLM orchestration loop in `/home/runner/work/coding_agent/coding_agent/main.py`
-- A dynamic tool dispatcher in `/home/runner/work/coding_agent/coding_agent/call_function.py`
-- Secure local tools in `/home/runner/work/coding_agent/coding_agent/functions/`
-- A sample target workspace in `/home/runner/work/coding_agent/coding_agent/calculator/`
+- An LLM orchestration loop in `./main.py`
+- A dynamic tool dispatcher in `./call_function.py`
+- Secure local tools in `./functions/`
+- A sample target workspace in `./calculator/`
 
 The agent receives a prompt, decides when to call tools, executes them, and feeds tool results back to the model until a final answer is produced.
 
@@ -122,5 +122,5 @@ Example workflow:
 
 ## Notes
 
-- Python requirement is `>=3.13` (see `/home/runner/work/coding_agent/coding_agent/pyproject.toml`).
+- Python requirement is `>=3.13` (see `./pyproject.toml`).
 - Tool execution is sandboxed to an injected working directory (`./calculator` in current dispatcher logic).
