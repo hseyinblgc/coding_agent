@@ -2,6 +2,47 @@ import os
 from config import MAX_CHARS
 
 
+schema_get_file_content = {
+    "type": "function",
+    "function": {
+        "name": "get_file_content",
+        "description": "Reads and returns the content of a specific file within the permitted working directory. It limits the output length to avoid token overflow.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "file_path": {
+                    "type": "string",
+                    "description": "The path to the file to be read, relative to the working directory (e.g., 'src/main.py' or 'config.json').",
+                },
+            },
+            "required": ["file_path"],
+        },
+    },
+}
+
+schema_write_file = {
+    "type": "function",
+    "function": {
+        "name": "write_file",
+        "description": "Writes or overwrites content to a specified file within the permitted working directory. It automatically creates parent directories if they do not exist.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "file_path": {
+                    "type": "string",
+                    "description": "The relative path where the file should be saved (e.g., 'notes/todo.txt').",
+                },
+                "content": {
+                    "type": "string",
+                    "description": "The full text content to be written into the file.",
+                },
+            },
+            "required": ["file_path", "content"],
+        },
+    },
+}
+
+
 def get_file_content(working_directory: str, file_path: str) -> str:
     working_dir_abs = os.path.abspath(working_directory)
     target_file = os.path.normpath(os.path.join(working_dir_abs, file_path))
@@ -22,6 +63,7 @@ def get_file_content(working_directory: str, file_path: str) -> str:
     except Exception as e:
         return f"Error: {e}"
 
+
 def write_file(working_directory: str, file_path: str, content: str) -> str:
     working_dir_abs = os.path.abspath(working_directory)
     target_file = os.path.normpath(os.path.join(working_dir_abs, file_path))
@@ -38,6 +80,8 @@ def write_file(working_directory: str, file_path: str, content: str) -> str:
         os.makedirs(os.path.dirname(target_file), exist_ok=True)
         with open(target_file, "w") as f:
             f.write(content)
-        return f'Successfully wrote to "{file_path}" ({len(content)} characters written)'
+        return (
+            f'Successfully wrote to "{file_path}" ({len(content)} characters written)'
+        )
     except Exception as e:
         return f"Error: {e}"

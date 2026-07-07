@@ -1,6 +1,29 @@
 import os
 import subprocess
 
+schema_run_python_file = {
+    "type": "function",
+    "function": {
+        "name": "run_python_file",
+        "description": "Executes a specific Python file (.py) within the permitted working directory and returns its standard output (STDOUT) and standard error (STDERR). Use this to run scripts, tests, or automation tasks.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "file_path": {
+                    "type": "string",
+                    "description": "The path to the Python file to execute, relative to the working directory (e.g., 'scripts/process_data.py').",
+                },
+                "args": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Optional list of command-line arguments to pass to the Python script (e.g., ['--verbose', 'input.csv']).",
+                },
+            },
+            "required": ["file_path"],
+        },
+    },
+}
+
 
 def run_python_file(
     working_directory: str, file_path: str, args: list[str] | None = None
@@ -8,7 +31,7 @@ def run_python_file(
     working_dir_abs = os.path.abspath(working_directory)
     target_file = os.path.normpath(os.path.join(working_dir_abs, file_path))
     command = ["python", target_file]
-    if args:    
+    if args:
         command.extend(args)
 
     # Will be True or False
