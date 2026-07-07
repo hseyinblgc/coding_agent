@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from openai.types.chat import ChatCompletion
 
-from call_function import available_functions
+from call_function import available_functions, call_function
 from prompts import system_prompt
 
 load_dotenv()
@@ -29,6 +29,8 @@ messages: list[dict[str, str]] = [
     {"role": "system", "content": system_prompt},
     {"role": "user", "content": args.user_prompt},
 ]
+
+
 response: ChatCompletion = client.chat.completions.create(
     model="openrouter/free",
     messages=messages,
@@ -44,9 +46,12 @@ def formatter(response: ChatCompletion, userprompt: str, verbose: bool) -> str:
 
     if message.tool_calls:
         for tool_call in message.tool_calls:
-            function_args = json.loads(tool_call.function.arguments or "{}")
-            print(f"Calling function: {tool_call.function.name}({function_args})")
-    
+            # function_args = json.loads(tool_call.function.arguments or "{}")
+            result_message = call_function(tool_call, verbose=verbose)
+            print(result_message)
+            if not result_message.get("content"):
+                raise ValueError("Tool message content cannot be empty.")
+
     if verbose:
         return f"""
         User prompt: {userprompt}
